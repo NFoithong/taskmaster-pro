@@ -45,22 +45,63 @@ var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
-//event delegation using .on()
+
+
+
+// modal was triggered
+$("#task-form-modal").on("show.bs.modal", function() {
+    // clear values
+    $("#modalTaskDescription, #modalDueDate").val("");
+});
+
+// modal is fully visible
+$("#task-form-modal").on("shown.bs.modal", function() {
+    // highlight textarea
+    $("#modalTaskDescription").trigger("focus");
+});
+
+// save button in modal was clicked
+$("#task-form-modal .btn-primary").click(function() {
+    // get form values
+    var taskText = $("#modalTaskDescription").val();
+    var taskDate = $("#modalDueDate").val();
+
+    if (taskText && taskDate) {
+        createTask(taskText, taskDate, "toDo");
+
+        // close modal
+        $("#task-form-modal").modal("hide");
+
+        // save in tasks array
+        tasks.toDo.push({
+            text: taskText,
+            date: taskDate
+        });
+
+        saveTasks();
+    }
+});
+
+
+// task text was clicked     event delegation using .on()
 $(".list-group").on("click", "p", function() {
     var text = $(this)
         .text()
         .trim();
+
+    // replace p element with a new textarea
     var textInput = $("<textarea>")
         .addClass("form-control")
         .val(text);
     $(this).replaceWith(textInput);
+    // auto focus new element
     textInput.trigger("focus");
     // console.log(text);
 });
 
-//The client has requested that the <textarea> revert back when it goes out of focus, so we can use that event in lieu of a "Save" button.
+// editable field was un-focused     The client has requested that the <textarea> revert back when it goes out of focus, so we can use that event in lieu of a "Save" button.
 $(".list-group").on("blur", "textarea", function() {
-    //get the textarea's current calue/text
+    //get the textarea's current value/text
     var text = $(this)
         .val()
         .trim();
@@ -77,6 +118,7 @@ $(".list-group").on("blur", "textarea", function() {
         .index();
 
     //we don't know the values, we'll have to use the variable names as placeholders.
+    // update task in array and re-save to localstorage
     tasks[status][index].text = text;
     saveTasks();
 
@@ -126,7 +168,7 @@ $(".list-group").on("blur", "input[type='text']", function() {
 
     //get the task's position in the list of other li elements
     var index = $(this)
-        .closest(".list-group")
+        .closest(".list-group-item")
         .index();
 
     //update task in array and re-save to localstorage
@@ -142,40 +184,6 @@ $(".list-group").on("blur", "input[type='text']", function() {
     $(this).replaceWith(taskSpan);
 });
 
-
-// modal was triggered
-$("#task-form-modal").on("show.bs.modal", function() {
-    // clear values
-    $("#modalTaskDescription, #modalDueDate").val("");
-});
-
-// modal is fully visible
-$("#task-form-modal").on("shown.bs.modal", function() {
-    // highlight textarea
-    $("#modalTaskDescription").trigger("focus");
-});
-
-// save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
-    // get form values
-    var taskText = $("#modalTaskDescription").val();
-    var taskDate = $("#modalDueDate").val();
-
-    if (taskText && taskDate) {
-        createTask(taskText, taskDate, "toDo");
-
-        // close modal
-        $("#task-form-modal").modal("hide");
-
-        // save in tasks array
-        tasks.toDo.push({
-            text: taskText,
-            date: taskDate
-        });
-
-        saveTasks();
-    }
-});
 
 // remove all tasks
 $("#remove-tasks").on("click", function() {
